@@ -1,19 +1,25 @@
-Sistema Bancário
+# Sistema Bancário
+
 Bem-vindo ao Sistema Bancário, um projeto simples em Java para realizar operações bancárias básicas. Este sistema permite que os usuários verifiquem saldos, enviem dinheiro para outros clientes e realizem outras operações relacionadas a uma conta bancária.
 
-Configuração
-Requisitos
-Java 8 ou superior
-Banco de dados MySQL (ou outro banco de dados compatível)
-Configuração do Banco de Dados
-Crie um banco de dados chamado sistema_bancario.
-Execute o script SQL fornecido em script_banco.sql para criar a tabela de clientes.
-Configuração do Projeto
-Clone o repositório para a sua máquina local:
+## Configuração
 
-bash
-Copy code
-git clone https://github.com/seu-usuario/sistema-bancario.git
+### Requisitos
+
+- Java 8 ou superior
+- Banco de dados MySQL (ou outro banco de dados compatível)
+
+### Configuração do Banco de Dados
+
+1. Crie um banco de dados chamado `sistema_bancario`.
+2. Execute o script SQL fornecido em `script_banco.sql` para criar a tabela de clientes.
+
+### Configuração do Projeto
+
+1. Clone o repositório para a sua máquina local:
+
+   ```bash
+   git clone https://github.com/seu-usuario/sistema-bancario.git
 Abra o projeto em sua IDE favorita (por exemplo, Eclipse, IntelliJ).
 
 Configure as informações do banco de dados no arquivo conexaoBanco.java.
