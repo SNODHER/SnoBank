@@ -11,65 +11,85 @@ public class SistemaBancario {
     public static void main(String[] args) {
         System.out.println("Bem vindo ao nosso sistema bancário.");
         try (Connection connection = conexaoBanco.obterConexao()) {
-            // Obter ID do cliente
+
             System.out.println("Digite seu ID:");
             int idOrigem = scanner.nextInt();
 
-            // Verificar se o cliente existe
             double saldoAtual = obterSaldo(idOrigem, connection);
             if (saldoAtual == -1) {
                 System.out.println("Cliente não encontrado.");
                 return;
             }
 
-            // Confirmar se o usuário deseja realizar a transferência
             System.out.println("Você é " + obterNomeCliente(idOrigem, connection) + "?");
             System.out.println("1 para sim, 2 para não:");
             int opcao = scanner.nextInt();
             if (opcao != 1) {
-                System.out.println("Transferência cancelada.");
+                System.out.println("Operação cancelada.");
                 return;
             }
 
-            // Solicitar senha
             System.out.println("Digite sua senha:");
             String senha = scanner.next();
 
-            // Verificar se a senha está correta
             if (!verificarSenha(idOrigem, senha, connection)) {
-                System.out.println("Senha incorreta. Transferência cancelada.");
+                System.out.println("Senha incorreta. Operação cancelada.");
                 return;
             }
 
-            // Continuar com a transferência
-            System.out.println("Digite o valor a ser transferido:");
-            double valorDaTransacao = scanner.nextDouble();
 
-            System.out.println("Digite o ID de destino:");
-            int idDestino = scanner.nextInt();
-
-            // Verificar se há saldo suficiente antes de realizar a transação
-            if (saldoAtual >= valorDaTransacao) {
-                realizarTransferencia(idOrigem, idDestino, valorDaTransacao, connection);
-                System.out.println("Transferência realizada com sucesso.");
-            } else {
-                System.out.println("Saldo insuficiente para realizar a transação.");
-            }
+            exibirMenu(idOrigem, connection);
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private static double obterSaldo(int idCliente, Connection connection) throws SQLException {
+    private static void exibirMenu(int idOrigem, Connection connection) throws SQLException {
+        int escolha;
+        do {
+            System.out.println("\nEscolha uma opção:");
+            System.out.println("1 - Verificar Saldo");
+            System.out.println("2 - Enviar Dinheiro");
+            System.out.println("0 - Sair");
+            escolha = scanner.nextInt();
+
+            switch (escolha) {
+                case 1:
+                    obterSaldo(idOrigem, connection);
+                    break;
+                case 2:
+                    System.out.println("Digite o ID do destinatário:");
+                    int idDestino = scanner.nextInt();
+
+                    System.out.println("Digite o valor a ser transferido:");
+                    double valor = scanner.nextDouble();
+
+                    realizarTransferencia(idOrigem, idDestino, valor, connection);
+                    break;
+                case 0:
+                    System.out.println("Saindo do sistema bancário. Até logo!");
+                    break;
+                default:
+                    System.out.println("Opção inválida. Tente novamente.");
+            }
+
+        } while (escolha != 0);
+    }
+
+    private static double obterSaldo(int idsaldo, Connection connection) throws SQLException {
+        System.out.println("Obtendo saldo para o cliente com ID: " + idsaldo);
         String sql = "SELECT saldo FROM clientes WHERE id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, idCliente);
+            stmt.setInt(1, idsaldo);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return rs.getDouble("saldo");
+                double saldo = rs.getDouble("saldo");
+                System.out.println("Saldo encontrado: " + saldo);
+                return saldo;
             } else {
+                System.out.println("Cliente não encontrado.");
                 return -1; // Cliente não encontrado
             }
         }
@@ -113,5 +133,7 @@ public class SistemaBancario {
             stmt.setInt(2, idDestino);
             stmt.executeUpdate();
         }
+        System.out.println();
     }
+
 }
