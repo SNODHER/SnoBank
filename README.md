@@ -24,7 +24,7 @@ Abra o projeto em sua IDE favorita (por exemplo, Eclipse, IntelliJ).
 
 Configure as informações do banco de dados no arquivo conexaoBanco.java.
 
-Uso
+### Uso
 Execute a classe SistemaBancario.java para iniciar o sistema.
 
 Insira o ID do cliente para acessar o sistema bancário.
@@ -46,5 +46,5 @@ Segurança: O sistema exige a inserção de uma senha para realizar operações,
 
 Verificação de Cliente: Antes de realizar operações, o sistema verifica se o cliente existe no banco de dados.
 
-Contribuições
+### Contribuições
 Sinta-se à vontade para contribuir para este projeto! Se você encontrar problemas ou tiver melhorias a sugerir, abra uma issue ou envie um pull request.
