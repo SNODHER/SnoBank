@@ -10,8 +10,11 @@ target/
 .idea/libraries/
 conexaoBanco.java
 java/conexaoBanco.java
-conexaoBanco.java
-pom.xml
+src/main/java/conexaoBanco.java
+
+.idea//src/main/java/conexaoBanco.java
+.idea//pom.xml
+
 
 *.iws
 *.iml
