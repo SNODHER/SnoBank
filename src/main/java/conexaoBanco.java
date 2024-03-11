@@ -4,9 +4,9 @@ import java.sql.SQLException;
 
 public class conexaoBanco {
 
-    private static final String URL = "jdbc:mysql://localhost:3306/Sno_Bank";
-    private static final String USUARIO = "root";
-    private static final String SENHA = "Snod8315.";
+    private static final String URL = "jdbc:mysql://localhost:#######";
+    private static final String USUARIO = "#####";
+    private static final String SENHA = "######";
 
     static {
         try {
