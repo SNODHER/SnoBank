@@ -39,7 +39,6 @@ public class CadastroCliente {
 
             inserirCliente(connection, sqlInserirCliente, nome, tipoConta, saldo, senha,
                     email, telefone, sexo, dataNascimento, nacionalidade, cpf, cep, estado);
-
             System.out.println("Cliente cadastrado com sucesso!");
         } catch (SQLException e) {
             e.printStackTrace();

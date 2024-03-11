@@ -2,6 +2,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Date;
+import java.util.Calendar;
 import java.util.Scanner;
 
 public class SistemaBancario {
@@ -10,17 +12,15 @@ public class SistemaBancario {
 
     public static void main(String[] args) {
         System.out.println("Bem vindo ao nosso sistema bancário.");
+        // Conexão com o banco de Dados.
         try (Connection connection = conexaoBanco.obterConexao()) {
 
             System.out.println("Digite seu ID:");
             int idOrigem = scanner.nextInt();
-
-            double saldoAtual = obterSaldo(idOrigem, connection);
-            if (saldoAtual == -1) {
+            if (!verificarExistenciaCliente(idOrigem, connection)) {
                 System.out.println("Cliente não encontrado.");
                 return;
             }
-
             System.out.println("Você é " + obterNomeCliente(idOrigem, connection) + "?");
             System.out.println("1 para sim, 2 para não:");
             int opcao = scanner.nextInt();
@@ -51,6 +51,7 @@ public class SistemaBancario {
             System.out.println("\nEscolha uma opção:");
             System.out.println("1 - Verificar Saldo");
             System.out.println("2 - Enviar Dinheiro");
+            System.out.println("3 - Ver Histórico de Transferências");
             System.out.println("0 - Sair");
             escolha = scanner.nextInt();
 
@@ -59,13 +60,10 @@ public class SistemaBancario {
                     obterSaldo(idOrigem, connection);
                     break;
                 case 2:
-                    System.out.println("Digite o ID do destinatário:");
-                    int idDestino = scanner.nextInt();
-
-                    System.out.println("Digite o valor a ser transferido:");
-                    double valor = scanner.nextDouble();
-
-                    realizarTransferencia(idOrigem, idDestino, valor, connection);
+                    realizarTransferencia(idOrigem, connection);
+                    break;
+                case 3:
+                    exibirHistoricoTransferencias(idOrigem, connection);
                     break;
                 case 0:
                     System.out.println("Saindo do sistema bancário. Até logo!");
@@ -119,8 +117,14 @@ public class SistemaBancario {
         }
     }
 
-    private static void realizarTransferencia(int idOrigem, int idDestino, double valor, Connection connection) throws SQLException {
+    private static void realizarTransferencia(int idOrigem, Connection connection) throws SQLException {
         String sql = "UPDATE clientes SET saldo = saldo - ? WHERE id = ?";
+        System.out.println("Digite o ID do destinatário:");
+        int idDestino = scanner.nextInt();
+
+        System.out.println("Digite o valor a ser transferido:");
+        double valor = scanner.nextDouble();
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setDouble(1, valor);
             stmt.setInt(2, idOrigem);
@@ -132,8 +136,62 @@ public class SistemaBancario {
             stmt.setDouble(1, valor);
             stmt.setInt(2, idDestino);
             stmt.executeUpdate();
+            // Insere uma entrada no histórico de transferências
+            String nomeOrigem = obterNomeCliente(idOrigem, connection);
+            String nomeDestino = obterNomeCliente(idDestino, connection);
+            inserirHistoricoTransferencia(idOrigem, idDestino, nomeOrigem, nomeDestino, valor, connection);
         }
-        System.out.println();
+        System.out.println("Tranferência realizada com sucesso!");
+    }
+    private static void inserirHistoricoTransferencia(int idOrigem, int idDestino, String nomeOrigem, String nomeDestino, double valor, Connection connection) throws SQLException {
+        java.util.Date dataAtual = Calendar.getInstance().getTime();
+        Date dataSQL = new Date(dataAtual.getTime());
+
+        String sql = "INSERT INTO historico_transferencias (id_origem, nome_origem, id_destino, nome_destino, valor_transferido, data_transferencia) VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idOrigem);
+            stmt.setString(2, nomeOrigem);
+            stmt.setInt(3, idDestino);
+            stmt.setString(4, nomeDestino);
+            stmt.setDouble(5, valor);
+            stmt.setDate(6, dataSQL);
+            stmt.executeUpdate();
+        }
     }
 
+    private static void exibirHistoricoTransferencias(int idCliente, Connection connection) throws SQLException {
+        String sql = "SELECT * FROM historico_transferencias WHERE id_origem = ? OR id_destino = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idCliente);
+            stmt.setInt(2, idCliente);
+            ResultSet rs = stmt.executeQuery();
+
+            System.out.println("Histórico de Transferências:");
+            while (rs.next()) {
+                int idTransferencia = rs.getInt("id_transferencia");
+                int idOrigem = rs.getInt("id_origem");
+                String nomeOrigem = rs.getString("nome_origem");
+                int idDestino = rs.getInt("id_destino");
+                String nomeDestino = rs.getString("nome_destino");
+                double valorTransferido = rs.getDouble("valor_transferido");
+                Date dataTransferencia = rs.getDate("data_transferencia");
+
+                System.out.println("ID Transferência: " + idTransferencia);
+                System.out.println("Origem: " + nomeOrigem + " (ID: " + idOrigem + ")");
+                System.out.println("Destino: " + nomeDestino + " (ID: " + idDestino + ")");
+                System.out.println("Valor Transferido: " + valorTransferido);
+                System.out.println("Data da Transferência: " + dataTransferencia);
+                System.out.println();
+            }
+        }
+    }
+
+    private static boolean verificarExistenciaCliente(int idCliente, Connection connection) throws SQLException {
+        String sql = "SELECT * FROM clientes WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idCliente);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next();
+        }
+    }
 }
